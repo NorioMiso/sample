@@ -114,6 +114,12 @@ export default async function WalkResultPage({ params }: Props) {
       )}
 
       <div className="flex flex-col gap-3 w-full max-w-sm">
+        <Link
+          href={`/courses/new?walk_record_id=${id}`}
+          className="nb-btn nb-btn-green w-full justify-center"
+        >
+          🗺️ このコースをシェアする
+        </Link>
         <Link href="/walk" className="nb-btn nb-btn-coral w-full justify-center">
           もう一度歩く 🚶
         </Link>

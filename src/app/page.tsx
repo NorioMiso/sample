@@ -99,6 +99,15 @@ export default async function HomePage() {
         🚶 散歩をはじめる
       </Link>
 
+      {/* コース一覧 */}
+      <Link
+        href="/courses"
+        className="nb-btn nb-btn-green w-full justify-center"
+        style={{ fontSize: '1rem', padding: '0.75rem' }}
+      >
+        🗺️ みんなのコースを見る
+      </Link>
+
       {/* 最近の散歩 */}
       {recentWalks && recentWalks.length > 0 && (
         <div>
