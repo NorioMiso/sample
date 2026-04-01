@@ -58,17 +58,9 @@ create table users (
   bio             text,
   birth_year      int check (birth_year between 1900 and 2100),
   -- denormalized age group for efficient ranking queries
-  age_group       text generated always as (
-    case
-      when birth_year is null             then 'unknown'
-      when (extract(year from now()) - birth_year) < 20  then 'teens'
-      when (extract(year from now()) - birth_year) < 30  then '20s'
-      when (extract(year from now()) - birth_year) < 40  then '30s'
-      when (extract(year from now()) - birth_year) < 50  then '40s'
-      when (extract(year from now()) - birth_year) < 60  then '50s'
-      else                                     '60+'
-    end
-  ) stored,
+  -- now() is not immutable so we cannot use a generated column;
+  -- this column is maintained by trg_users_age_group instead.
+  age_group       text,
   created_at      timestamptz not null default now(),
   updated_at      timestamptz not null default now()
 );
@@ -94,17 +86,18 @@ create table walk_records (
   calories              int,
 
   -- contextual metadata (denormalized for fast ranking queries)
+  -- 'Asia/Tokyo' is not immutable (DST table lookup); use UTC + fixed 9h offset instead.
   walked_date           date not null generated always as (
-    (started_at at time zone 'Asia/Tokyo')::date
+    (started_at at time zone 'UTC' + interval '9 hours')::date
   ) stored,
   day_of_week           int not null generated always as (
-    extract(dow from started_at at time zone 'Asia/Tokyo')::int  -- 0=Sun … 6=Sat
+    extract(dow from (started_at at time zone 'UTC' + interval '9 hours'))::int  -- 0=Sun … 6=Sat
   ) stored,
   month                 int not null generated always as (
-    extract(month from started_at at time zone 'Asia/Tokyo')::int
+    extract(month from (started_at at time zone 'UTC' + interval '9 hours'))::int
   ) stored,
   year                  int not null generated always as (
-    extract(year from started_at at time zone 'Asia/Tokyo')::int
+    extract(year from (started_at at time zone 'UTC' + interval '9 hours'))::int
   ) stored,
   time_of_day           time_of_day_category not null,
   weather               weather_condition,
@@ -355,6 +348,34 @@ $$;
 create trigger trg_users_updated_at
   before update on users
   for each row execute function set_updated_at();
+
+-- age_group は now() を使うため generated column にできない → トリガーで管理
+create or replace function set_age_group()
+returns trigger language plpgsql as $$
+declare
+  current_year int := extract(year from now())::int;
+  age int;
+begin
+  if new.birth_year is null then
+    new.age_group := 'unknown';
+  else
+    age := current_year - new.birth_year;
+    new.age_group := case
+      when age < 20 then 'teens'
+      when age < 30 then '20s'
+      when age < 40 then '30s'
+      when age < 50 then '40s'
+      when age < 60 then '50s'
+      else '60+'
+    end;
+  end if;
+  return new;
+end;
+$$;
+
+create trigger trg_users_age_group
+  before insert or update of birth_year on users
+  for each row execute function set_age_group();
 
 create trigger trg_course_posts_updated_at
   before update on course_posts
