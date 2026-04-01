@@ -37,6 +37,14 @@ export default async function WalkResultPage({ params }: Props) {
     .eq('walk_record_id', id)
     .maybeSingle()
 
+  // 直近2分以内に獲得したバッジ（この散歩で新たに解除されたもの）
+  const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
+  const { data: newBadges } = await supabase
+    .from('user_badges')
+    .select('badge_id, earned_at, badges(slug, name, description, category)')
+    .eq('user_id', record.user_id)
+    .gte('earned_at', twoMinutesAgo)
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
       <div className="text-center">
@@ -57,6 +65,30 @@ export default async function WalkResultPage({ params }: Props) {
               {praise.rank}位 / {praise.total_count}人中
             </p>
           )}
+        </div>
+      )}
+
+      {/* 新バッジ */}
+      {newBadges && newBadges.length > 0 && (
+        <div className="w-full max-w-sm flex flex-col gap-2">
+          {newBadges.map(ub => {
+            const badge = Array.isArray(ub.badges) ? ub.badges[0] : ub.badges
+            if (!badge) return null
+            return (
+              <div
+                key={ub.badge_id}
+                className="nb-card p-4 flex items-center gap-3"
+                style={{ background: 'var(--yellow)' }}
+              >
+                <span className="text-3xl">🏅</span>
+                <div>
+                  <p className="text-xs font-black text-gray-600 mb-0.5">バッジ獲得！</p>
+                  <p className="font-black">{badge.name}</p>
+                  <p className="text-xs text-gray-600">{badge.description}</p>
+                </div>
+              </div>
+            )
+          })}
         </div>
       )}
 

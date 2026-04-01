@@ -48,23 +48,25 @@ export default async function HomePage() {
       </div>
 
       {/* プロフィール */}
-      <div className="nb-card p-4 flex items-center gap-3">
-        <div
-          className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
-          style={{
-            background: profile.icon_url ? 'transparent' : 'var(--yellow)',
-            border: '2px solid black',
-          }}
-        >
-          {profile.icon_url
-            ? <img src={profile.icon_url} alt="" className="w-full h-full rounded-full object-cover" />
-            : '🚶'}
+      <Link href="/profile">
+        <div className="nb-card p-4 flex items-center gap-3 hover:translate-y-[-1px] transition-transform">
+          <div
+            className="w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0"
+            style={{
+              background: profile.icon_url ? 'transparent' : 'var(--yellow)',
+              border: '2px solid black',
+            }}
+          >
+            {profile.icon_url
+              ? <img src={profile.icon_url} alt="" className="w-full h-full rounded-full object-cover" />
+              : '🚶'}
+          </div>
+          <div className="flex-1">
+            <p className="font-black">{profile.nickname}</p>
+            <p className="text-xs font-semibold text-gray-500">プロフィール・バッジを見る →</p>
+          </div>
         </div>
-        <div>
-          <p className="font-black">{profile.nickname}</p>
-          <p className="text-xs font-semibold text-gray-500">sanpostar</p>
-        </div>
-      </div>
+      </Link>
 
       {/* 統計 */}
       {stats ? (
