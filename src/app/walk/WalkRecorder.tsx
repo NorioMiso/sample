@@ -138,8 +138,13 @@ export default function WalkRecorder() {
 
   // ---- IDLE ----
   if (status === 'idle') {
+    const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:'
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname === 'localhost'
+    const gpsAvailable = typeof navigator !== 'undefined' && !!navigator.geolocation
+    const httpsRequired = !isHttps && !isLocalhost
+
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-8">
+      <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
         <div className="text-center">
           <h1 className="text-3xl font-black">散歩をはじめる</h1>
           <p className="text-sm font-semibold text-gray-500 mt-1">
@@ -147,10 +152,34 @@ export default function WalkRecorder() {
           </p>
         </div>
 
-        {gpsError && <p className="nb-error text-center">{gpsError}</p>}
+        {httpsRequired && (
+          <div className="nb-card p-4 w-full max-w-sm"
+               style={{ background: 'var(--coral)', borderColor: 'black' }}>
+            <p className="font-black text-sm mb-1">⚠️ スマホのGPSはHTTPS必須</p>
+            <p className="text-xs font-semibold">
+              このURLはHTTPのためGPSが使えません。<br />
+              PCの localhost:3000 か、HTTPS環境でお試しください。
+            </p>
+          </div>
+        )}
+
+        {!gpsAvailable && !httpsRequired && (
+          <div className="nb-card p-4 w-full max-w-sm"
+               style={{ background: 'var(--coral)' }}>
+            <p className="font-black text-sm">⚠️ このブラウザはGPSに対応していません</p>
+          </div>
+        )}
+
+        {gpsError && (
+          <div className="nb-card p-4 w-full max-w-sm"
+               style={{ background: 'var(--coral)' }}>
+            <p className="font-black text-sm">⚠️ {gpsError}</p>
+          </div>
+        )}
 
         <button
           onClick={startRecording}
+          disabled={httpsRequired || !gpsAvailable}
           className="nb-btn nb-btn-coral"
           style={{ fontSize: '1.1rem', padding: '1rem 2.5rem' }}
         >
