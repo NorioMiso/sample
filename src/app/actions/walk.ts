@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import type { WeatherCondition, TimeOfDayCategory } from '@/types/supabase'
 import { generateAndSavePraise } from '@/app/actions/praise'
 import { checkAndAwardBadges } from '@/lib/badges'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export type SaveWalkInput = {
   startedAt:        string   // ISO string
@@ -61,10 +62,29 @@ export async function saveWalk(input: SaveWalkInput) {
   await updateWalkStats(supabase, profile.id, input)
 
   // 称え生成 + バッジチェックを並列実行（失敗しても散歩保存はブロックしない）
-  await Promise.allSettled([
+  const [, badgeResult] = await Promise.allSettled([
     generateAndSavePraise(record.id, profile.id),
     checkAndAwardBadges(supabase, profile.id),
   ])
+
+  // 新バッジ獲得通知を作成
+  if (badgeResult.status === 'fulfilled' && badgeResult.value.length > 0) {
+    try {
+      const admin = createAdminClient()
+      await admin.from('notifications').insert(
+        badgeResult.value.map(b => ({
+          user_id:      profile.id,
+          type:         'badge_earned' as const,
+          title:        `🏅 バッジ獲得：${b.name}`,
+          body:         b.description,
+          related_id:   b.id,
+          related_type: 'badge',
+        })),
+      )
+    } catch {
+      // 通知保存の失敗は無視
+    }
+  }
 
   redirect(`/walk/result/${record.id}`)
 }

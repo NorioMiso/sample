@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
@@ -79,6 +80,31 @@ export async function addComment(formData: FormData) {
     body,
   })
 
+  // コース投稿主にコメント通知（自分のコースへのコメントのみ）
+  const { data: post } = await supabase
+    .from('course_posts')
+    .select('user_id, title')
+    .eq('id', coursePostId)
+    .maybeSingle()
+
+  if (post && post.user_id !== profile.id) {
+    const { data: commenter } = await supabase
+      .from('users')
+      .select('nickname')
+      .eq('id', profile.id)
+      .maybeSingle()
+
+    const admin = createAdminClient()
+    await admin.from('notifications').insert({
+      user_id:      post.user_id,
+      type:         'comment',
+      title:        `💬 ${commenter?.nickname ?? '誰か'}がコメントしました`,
+      body:         `「${post.title}」に: ${body.slice(0, 50)}${body.length > 50 ? '…' : ''}`,
+      related_id:   coursePostId,
+      related_type: 'course_post',
+    })
+  }
+
   revalidatePath(`/courses/${coursePostId}`)
 }
 
@@ -132,6 +158,32 @@ export async function toggleNiceSanpo(coursePostId: string): Promise<{ liked: bo
     return { liked: false }
   } else {
     await supabase.from('nice_sanpos').insert({ user_id: profile.id, course_post_id: coursePostId })
+
+    // コース投稿主にナイス通知（自分のコースへのナイスのみ）
+    const { data: post } = await supabase
+      .from('course_posts')
+      .select('user_id, title')
+      .eq('id', coursePostId)
+      .maybeSingle()
+
+    if (post && post.user_id !== profile.id) {
+      const { data: liker } = await supabase
+        .from('users')
+        .select('nickname')
+        .eq('id', profile.id)
+        .maybeSingle()
+
+      const admin = createAdminClient()
+      await admin.from('notifications').insert({
+        user_id:      post.user_id,
+        type:         'nice_sanpo',
+        title:        `💛 ${liker?.nickname ?? '誰か'}がナイス散歩！しました`,
+        body:         `「${post.title}」がナイスされました`,
+        related_id:   coursePostId,
+        related_type: 'course_post',
+      })
+    }
+
     revalidatePath(`/courses/${coursePostId}`)
     return { liked: true }
   }

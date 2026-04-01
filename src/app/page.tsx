@@ -22,6 +22,13 @@ export default async function HomePage() {
     .eq('user_id', profile.id)
     .maybeSingle()
 
+  // 未読通知数
+  const { count: unreadCount } = await supabase
+    .from('notifications')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', profile.id)
+    .eq('is_read', false)
+
   const { data: recentWalks } = await supabase
     .from('walk_records')
     .select('id, walked_date, distance_meters, duration_seconds, weather, time_of_day')
@@ -40,11 +47,30 @@ export default async function HomePage() {
       {/* ヘッダー */}
       <div className="flex items-center justify-between pt-4">
         <h1 className="text-2xl font-black">sanpostar</h1>
-        <form action={signOut}>
-          <button type="submit" className="nb-btn nb-btn-white text-xs py-1 px-3">
-            ログアウト
-          </button>
-        </form>
+        <div className="flex items-center gap-2">
+          <Link href="/notifications" className="relative p-2">
+            <span className="text-xl">🔔</span>
+            {!!unreadCount && unreadCount > 0 && (
+              <span
+                className="absolute top-0.5 right-0.5 text-white text-xs font-black rounded-full flex items-center justify-center"
+                style={{
+                  background: 'var(--coral)',
+                  minWidth: '1.1rem',
+                  height: '1.1rem',
+                  fontSize: '0.6rem',
+                  border: '1.5px solid black',
+                }}
+              >
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
+          </Link>
+          <form action={signOut}>
+            <button type="submit" className="nb-btn nb-btn-white text-xs py-1 px-3">
+              ログアウト
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* プロフィール */}
