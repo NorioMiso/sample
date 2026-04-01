@@ -1,26 +1,125 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
 @import "tailwindcss";
 
+/* =============================================
+   sanpostar design system
+   ネオブルータリスト × ほぼ日ポップ
+   ============================================= */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --yellow:  #FFD93D;
+  --green:   #6BCB77;
+  --coral:   #FF6B6B;
+  --black:   #111111;
+  --white:   #FFFFFF;
+  --bg:      #FFFDF0;
+  --border:  2px solid var(--black);
+  --shadow:  4px 4px 0 var(--black);
+  --shadow-sm: 2px 2px 0 var(--black);
+  --radius:  8px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-yellow:  #FFD93D;
+  --color-green:   #6BCB77;
+  --color-coral:   #FF6B6B;
+  --color-bg:      #FFFDF0;
+  --font-sans: 'Nunito', sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--bg);
+  color: var(--black);
+  font-family: 'Nunito', sans-serif;
+}
+
+/* ---- ネオブルータリスト ユーティリティ ---- */
+
+.nb-card {
+  background: var(--white);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.nb-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 0.95rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition: transform 0.08s, box-shadow 0.08s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.nb-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+.nb-btn-yellow  { background: var(--yellow); color: var(--black); }
+.nb-btn-green   { background: var(--green);  color: var(--black); }
+.nb-btn-coral   { background: var(--coral);  color: var(--black); }
+.nb-btn-white   { background: var(--white);  color: var(--black); }
+.nb-btn-black   { background: var(--black);  color: var(--white); }
+
+.nb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: var(--shadow-sm);
+}
+
+.nb-input {
+  width: 100%;
+  font-family: 'Nunito', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: var(--border);
+  border-radius: var(--radius);
+  padding: 0.65rem 0.9rem;
+  background: var(--white);
+  color: var(--black);
+  outline: none;
+  transition: box-shadow 0.1s;
+}
+
+.nb-input:focus {
+  box-shadow: var(--shadow-sm);
+}
+
+.nb-input::placeholder {
+  color: #aaa;
+  font-weight: 400;
+}
+
+.nb-label {
+  display: block;
+  font-weight: 800;
+  font-size: 0.85rem;
+  margin-bottom: 0.35rem;
+  color: var(--black);
+}
+
+.nb-error {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--coral);
+  margin-top: 0.3rem;
 }

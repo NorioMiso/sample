@@ -16,7 +16,7 @@ export type PraiseType = 'daily' | 'personal_best'
 export type BadgeCategory = 'streak' | 'distance' | 'weather' | 'time_of_day' | 'community' | 'course' | 'special'
 export type NotificationType = 'praise_daily' | 'personal_best' | 'badge_earned' | 'nice_sanpo' | 'comment' | 'new_favorite'
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
       users: {
@@ -27,7 +27,7 @@ export interface Database {
           icon_url: string | null
           bio: string | null
           birth_year: number | null
-          age_group: string | null  // generated
+          age_group: string | null
           created_at: string
           updated_at: string
         }
@@ -38,6 +38,7 @@ export interface Database {
           icon_url?: string | null
           bio?: string | null
           birth_year?: number | null
+          age_group?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -46,8 +47,10 @@ export interface Database {
           icon_url?: string | null
           bio?: string | null
           birth_year?: number | null
+          age_group?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       walk_records: {
         Row: {
@@ -55,14 +58,14 @@ export interface Database {
           user_id: string
           started_at: string
           ended_at: string
-          duration_seconds: number  // generated
+          duration_seconds: number
           distance_meters: number
           steps: number | null
           calories: number | null
-          walked_date: string       // generated
-          day_of_week: number       // generated
-          month: number             // generated
-          year: number              // generated
+          walked_date: string
+          day_of_week: number
+          month: number
+          year: number
           time_of_day: TimeOfDayCategory
           weather: WeatherCondition | null
           is_public: boolean
@@ -73,9 +76,14 @@ export interface Database {
           user_id: string
           started_at: string
           ended_at: string
+          duration_seconds?: number
           distance_meters: number
           steps?: number | null
           calories?: number | null
+          walked_date?: string
+          day_of_week?: number
+          month?: number
+          year?: number
           time_of_day: TimeOfDayCategory
           weather?: WeatherCondition | null
           is_public?: boolean
@@ -87,6 +95,7 @@ export interface Database {
           steps?: number | null
           calories?: number | null
         }
+        Relationships: []
       }
       walk_routes: {
         Row: {
@@ -107,6 +116,7 @@ export interface Database {
           geom?: Json | null
           route_geojson?: Json | null
         }
+        Relationships: []
       }
       walk_stats: {
         Row: {
@@ -150,6 +160,7 @@ export interface Database {
           last_walked_date?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       course_posts: {
         Row: {
@@ -184,6 +195,7 @@ export interface Database {
           is_public?: boolean
           updated_at?: string
         }
+        Relationships: []
       }
       course_photos: {
         Row: {
@@ -203,6 +215,7 @@ export interface Database {
         Update: {
           order_index?: number
         }
+        Relationships: []
       }
       nice_sanpos: {
         Row: {
@@ -217,7 +230,10 @@ export interface Database {
           course_post_id: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          [key: string]: never
+        }
+        Relationships: []
       }
       course_walks: {
         Row: {
@@ -232,7 +248,10 @@ export interface Database {
           course_post_id: string
           walked_at?: string
         }
-        Update: never
+        Update: {
+          [key: string]: never
+        }
+        Relationships: []
       }
       course_comments: {
         Row: {
@@ -260,6 +279,7 @@ export interface Database {
           photo_url?: string | null
           updated_at?: string
         }
+        Relationships: []
       }
       favorite_sanposters: {
         Row: {
@@ -274,7 +294,10 @@ export interface Database {
           target_user_id: string
           created_at?: string
         }
-        Update: never
+        Update: {
+          [key: string]: never
+        }
+        Relationships: []
       }
       praises: {
         Row: {
@@ -311,6 +334,7 @@ export interface Database {
           is_pinned?: boolean
           is_read?: boolean
         }
+        Relationships: []
       }
       badges: {
         Row: {
@@ -343,6 +367,7 @@ export interface Database {
           icon_url?: string | null
           is_secret?: boolean
         }
+        Relationships: []
       }
       user_badges: {
         Row: {
@@ -357,7 +382,10 @@ export interface Database {
           badge_id: string
           earned_at?: string
         }
-        Update: never
+        Update: {
+          [key: string]: never
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
@@ -385,10 +413,11 @@ export interface Database {
         Update: {
           is_read?: boolean
         }
+        Relationships: []
       }
     }
-    Views: Record<string, never>
-    Functions: Record<string, never>
+    Views: { [_ in never]: never }
+    Functions: { [_ in never]: never }
     Enums: {
       weather_condition: WeatherCondition
       time_of_day_category: TimeOfDayCategory
@@ -396,5 +425,6 @@ export interface Database {
       badge_category: BadgeCategory
       notification_type: NotificationType
     }
+    CompositeTypes: { [_ in never]: never }
   }
 }
