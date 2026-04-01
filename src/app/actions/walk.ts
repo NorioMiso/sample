@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import type { WeatherCondition, TimeOfDayCategory } from '@/types/supabase'
+import { generateAndSavePraise } from '@/app/actions/praise'
 
 export type SaveWalkInput = {
   startedAt:        string   // ISO string
@@ -57,6 +58,9 @@ export async function saveWalk(input: SaveWalkInput) {
 
   // walk_stats を upsert
   await updateWalkStats(supabase, profile.id, input)
+
+  // 称えを非同期生成（失敗しても散歩保存はブロックしない）
+  await generateAndSavePraise(record.id, profile.id)
 
   redirect(`/walk/result/${record.id}`)
 }

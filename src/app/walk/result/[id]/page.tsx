@@ -31,12 +31,34 @@ export default async function WalkResultPage({ params }: Props) {
     .eq('user_id', record.user_id)
     .maybeSingle()
 
+  const { data: praise } = await supabase
+    .from('praises')
+    .select('praise_text, rank, total_count')
+    .eq('walk_record_id', id)
+    .maybeSingle()
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
       <div className="text-center">
         <div className="text-5xl mb-3">🎉</div>
         <h2 className="text-2xl font-black">記録しました！</h2>
       </div>
+
+      {/* AI称え */}
+      {praise && (
+        <div
+          className="nb-card p-5 w-full max-w-sm"
+          style={{ background: 'var(--green)' }}
+        >
+          <p className="text-xs font-black text-gray-700 mb-2">✨ 今日の称え</p>
+          <p className="font-black text-base leading-relaxed">{praise.praise_text}</p>
+          {praise.rank && praise.total_count && (
+            <p className="text-xs font-semibold text-gray-600 mt-2 text-right">
+              {praise.rank}位 / {praise.total_count}人中
+            </p>
+          )}
+        </div>
+      )}
 
       {/* 今回の記録 */}
       <div className="nb-card p-5 w-full max-w-sm">
