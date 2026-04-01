@@ -29,10 +29,14 @@ export async function updateSession(request: NextRequest) {
   // セッションをリフレッシュ（重要: await必須）
   const { data: { user } } = await supabase.auth.getUser()
 
-  // 認証必須ページへの未ログインアクセスをリダイレクト
-  const isAuthRoute = request.nextUrl.pathname.startsWith('/auth')
   const isProtectedRoute = ['/walk', '/profile', '/courses/new'].some(
     (p) => request.nextUrl.pathname.startsWith(p)
+  )
+
+  // ログイン済みユーザーをログイン・登録ページから弾く
+  // setup / callback / verify はログイン済みでもアクセスが必要なので除外
+  const isLoginOrSignup = ['/auth/login', '/auth/signup'].includes(
+    request.nextUrl.pathname
   )
 
   if (!user && isProtectedRoute) {
@@ -41,7 +45,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-  if (user && isAuthRoute) {
+  if (user && isLoginOrSignup) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
