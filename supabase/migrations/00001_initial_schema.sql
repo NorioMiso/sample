@@ -76,9 +76,9 @@ create table walk_records (
   -- timing
   started_at            timestamptz not null,
   ended_at              timestamptz not null,
-  duration_seconds      int not null generated always as (
-    extract(epoch from (ended_at - started_at))::int
-  ) stored,
+  -- generated columns are avoided due to immutability restrictions in Supabase;
+  -- these columns are populated by trg_walk_records_computed on INSERT.
+  duration_seconds      int not null default 0,
 
   -- distance / activity
   distance_meters       int not null check (distance_meters >= 0),
@@ -86,19 +86,11 @@ create table walk_records (
   calories              int,
 
   -- contextual metadata (denormalized for fast ranking queries)
-  -- 'Asia/Tokyo' is not immutable (DST table lookup); use UTC + fixed 9h offset instead.
-  walked_date           date not null generated always as (
-    (started_at at time zone 'UTC' + interval '9 hours')::date
-  ) stored,
-  day_of_week           int not null generated always as (
-    extract(dow from (started_at at time zone 'UTC' + interval '9 hours'))::int  -- 0=Sun … 6=Sat
-  ) stored,
-  month                 int not null generated always as (
-    extract(month from (started_at at time zone 'UTC' + interval '9 hours'))::int
-  ) stored,
-  year                  int not null generated always as (
-    extract(year from (started_at at time zone 'UTC' + interval '9 hours'))::int
-  ) stored,
+  -- populated by trg_walk_records_computed on INSERT
+  walked_date           date not null default current_date,
+  day_of_week           int  not null default 0,  -- 0=Sun … 6=Sat
+  month                 int  not null default 1,
+  year                  int  not null default 2000,
   time_of_day           time_of_day_category not null,
   weather               weather_condition,
 
@@ -376,6 +368,28 @@ $$;
 create trigger trg_users_age_group
   before insert or update of birth_year on users
   for each row execute function set_age_group();
+
+-- walk_records の計算カラム（generated column の代替）
+create or replace function set_walk_record_computed()
+returns trigger language plpgsql as $$
+declare
+  jst timestamp;
+begin
+  -- JST = UTC + 9h (日本は通年UTC+9、DSTなし)
+  jst := (new.started_at at time zone 'UTC') + interval '9 hours';
+
+  new.duration_seconds := extract(epoch from (new.ended_at - new.started_at))::int;
+  new.walked_date      := jst::date;
+  new.day_of_week      := extract(dow from jst)::int;
+  new.month            := extract(month from jst)::int;
+  new.year             := extract(year from jst)::int;
+  return new;
+end;
+$$;
+
+create trigger trg_walk_records_computed
+  before insert on walk_records
+  for each row execute function set_walk_record_computed();
 
 create trigger trg_course_posts_updated_at
   before update on course_posts
