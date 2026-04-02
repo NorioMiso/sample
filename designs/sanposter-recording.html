@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンポスター – 記録中</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Kaisei+Decol:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --yellow: #FFD93D;
+    --green: #6BCB77;
+    --green-dark: #3D9E4A;
+    --coral: #FF6B6B;
+    --blue: #4ECDC4;
+    --ink: #1A1A2E;
+    --ink-soft: #555566;
+    --surface: #FFFFFF;
+    --border: #F0E8DC;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #FFE8D6;
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    min-height: 844px;
+    border-radius: 48px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 28px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    position: relative;
+    z-index: 10;
+  }
+
+  /* 上部ステータス */
+  .top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 20px 12px;
+    position: relative;
+    z-index: 10;
+  }
+
+  .rec-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--coral);
+    border: 2.5px solid var(--ink);
+    border-radius: 20px;
+    padding: 5px 12px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .rec-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: white;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.2; }
+  }
+
+  .rec-label {
+    font-size: 12px;
+    font-weight: 900;
+    color: white;
+    letter-spacing: 0.08em;
+  }
+
+  .elapsed-time {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* 3つの統計 */
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    margin: 0 16px 0;
+    position: relative;
+    z-index: 10;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 12px 8px;
+    text-align: center;
+  }
+
+  .stat-card.main {
+    background: var(--yellow);
+  }
+
+  .stat-value {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-unit {
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  /* 地図エリア */
+  .map-area {
+    flex: 1;
+    margin: 12px 16px;
+    border-radius: 24px;
+    border: 3px solid var(--ink);
+    box-shadow: 4px 4px 0 var(--ink);
+    overflow: hidden;
+    position: relative;
+    min-height: 360px;
+    background: #E8F0E8;
+  }
+
+  /* 地図の背景（Google Maps風） */
+  .map-bg {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    inset: 0;
+    background:
+      /* 道路（横） */
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 48px,
+        #fff 48px,
+        #fff 52px
+      ),
+      /* 道路（縦） */
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 68px,
+        #fff 68px,
+        #fff 72px
+      ),
+      /* ブロック */
+      #E8EFE2;
+  }
+
+  /* 公園っぽい緑エリア */
+  .map-park {
+    position: absolute;
+    top: 60px;
+    left: 30px;
+    width: 100px;
+    height: 70px;
+    background: #C8DFC0;
+    border-radius: 12px;
+    opacity: 0.7;
+  }
+
+  .map-park-label {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 9px;
+    font-weight: 800;
+    color: #3D7A35;
+    white-space: nowrap;
+  }
+
+  .map-park2 {
+    position: absolute;
+    bottom: 80px;
+    right: 20px;
+    width: 80px;
+    height: 55px;
+    background: #C8DFC0;
+    border-radius: 10px;
+    opacity: 0.7;
+  }
+
+  /* 歩いたルート */
+  .map-route {
+    position: absolute;
+    inset: 0;
+  }
+
+  .map-route svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* 現在地 */
+  .current-loc {
+    position: absolute;
+    bottom: 38%;
+    left: 55%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    z-index: 5;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(-50%, -50%); }
+    50% { transform: translate(-50%, calc(-50% - 4px)); }
+  }
+
+  .loc-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .loc-pulse {
+    position: absolute;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(255, 217, 61, 0.3);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s ease-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes pulse {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(1.8); opacity: 0; }
+  }
+
+  /* 地図コントロール */
+  .map-controls {
+    position: absolute;
+    right: 12px;
+    top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 10;
+  }
+
+  .map-ctrl-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 2px 2px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  /* 下部コントロール */
+  .bottom-controls {
+    margin: 0 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .photo-btn {
+    width: 52px;
+    height: 52px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    flex-shrink: 0;
+  }
+
+  .photo-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .pause-btn {
+    flex: 1;
+    height: 52px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--ink);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .pause-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .stop-btn {
+    width: 52px;
+    height: 52px;
+    background: var(--coral);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .stop-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  /* 終了後の称えオーバーレイ */
+  .praise-overlay {
+    display: none;
+    position: absolute;
+    inset: 0;
+    background: rgba(26,26,46,0.6);
+    z-index: 100;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 20px;
+    border-radius: 48px;
+  }
+
+  .praise-overlay.show {
+    display: flex;
+    animation: overlayIn 0.4s ease both;
+  }
+
+  @keyframes overlayIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .praise-result {
+    background: var(--surface);
+    border: 3px solid var(--ink);
+    border-radius: 28px;
+    padding: 28px 24px 24px;
+    width: 100%;
+    box-shadow: 5px 5px 0 var(--ink);
+    animation: resultPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+  }
+
+  @keyframes resultPop {
+    from { transform: translateY(40px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .result-stars {
+    text-align: center;
+    font-size: 28px;
+    margin-bottom: 8px;
+    letter-spacing: 4px;
+  }
+
+  .result-title {
+    text-align: center;
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .result-praise {
+    background: var(--yellow);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.5;
+    margin-bottom: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+  }
+
+  .result-stats {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .result-stat {
+    flex: 1;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 10px;
+    text-align: center;
+  }
+
+  .result-stat-value {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  .result-stat-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .result-btn {
+    flex: 1;
+    height: 46px;
+    border-radius: 14px;
+    border: 2.5px solid var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    cursor: pointer;
+    box-shadow: 2px 2px 0 var(--ink);
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .result-btn:active {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .result-btn.secondary {
+    background: var(--surface);
+    color: var(--ink);
+  }
+
+  .result-btn.primary {
+    background: var(--green);
+    color: var(--ink);
+  }
+
+  /* タイマー */
+  #timer {
+    font-variant-numeric: tabular-nums;
+  }
+</style>
+</head>
+<body>
+<div class="phone" style="position:relative">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>●●●</span>
+  </div>
+
+  <!-- 上部 -->
+  <div class="top-bar">
+    <div class="rec-indicator">
+      <div class="rec-dot"></div>
+      <div class="rec-label">REC</div>
+    </div>
+    <div class="elapsed-time" id="timer">00:23:14</div>
+  </div>
+
+  <!-- 3統計 -->
+  <div class="stats-row">
+    <div class="stat-card main">
+      <div class="stat-value">2.8</div>
+      <div class="stat-unit">km</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">🐈</div>
+      <div class="stat-unit">はやい</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">2,847</div>
+      <div class="stat-unit">歩</div>
+    </div>
+  </div>
+
+  <!-- 地図 -->
+  <div class="map-area">
+    <div class="map-bg"></div>
+
+    <div class="map-park">
+      <div class="map-park-label">🌳 中央公園</div>
+    </div>
+    <div class="map-park2"></div>
+
+    <!-- ルートSVG -->
+    <div class="map-route">
+      <svg viewBox="0 0 358 360" preserveAspectRatio="none">
+        <path
+          d="M 60 300 L 60 200 Q 60 180 80 180 L 140 180 Q 160 180 160 160 L 160 120 Q 160 100 180 100 L 220 100 Q 240 100 240 120 L 240 160 Q 240 180 220 180 L 200 180 Q 180 180 180 200 L 180 240"
+          fill="none"
+          stroke="#FF6B6B"
+          stroke-width="5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-dasharray="8 0"
+          opacity="0.9"
+        />
+        <!-- スタート地点 -->
+        <circle cx="60" cy="300" r="7" fill="#6BCB77" stroke="#1A1A2E" stroke-width="2.5"/>
+        <text x="70" y="304" font-size="10" font-weight="800" fill="#1A1A2E" font-family="Nunito">スタート</text>
+      </svg>
+    </div>
+
+    <!-- 現在地 -->
+    <div class="current-loc">
+      <div class="loc-pulse"></div>
+      <div class="loc-icon">🚶</div>
+    </div>
+
+    <!-- 地図コントロール -->
+    <div class="map-controls">
+      <div class="map-ctrl-btn">＋</div>
+      <div class="map-ctrl-btn">－</div>
+      <div class="map-ctrl-btn">📍</div>
+    </div>
+  </div>
+
+  <!-- 下部コントロール -->
+  <div class="bottom-controls">
+    <button class="photo-btn" title="写真を撮る">📷</button>
+    <button class="pause-btn">⏸ 一時停止</button>
+    <button class="stop-btn" onclick="showResult()" title="終了">⏹</button>
+  </div>
+
+  <!-- 終了後オーバーレイ -->
+  <div class="praise-overlay" id="praiseOverlay">
+    <div class="praise-result">
+      <div class="result-stars">⭐⭐⭐</div>
+      <div class="result-title">さんぽ終了！</div>
+      <div class="result-praise">
+        雨の深夜に歩いた距離、<br>全ユーザー中 <span style="font-size:20px">5位</span> です。
+      </div>
+      <div class="result-stats">
+        <div class="result-stat">
+          <div class="result-stat-value">4.2km</div>
+          <div class="result-stat-label">距離</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-value">51分</div>
+          <div class="result-stat-label">時間</div>
+        </div>
+        <div class="result-stat">
+          <div class="result-stat-value">🐈</div>
+          <div class="result-stat-label">はやい</div>
+        </div>
+      </div>
+      <div class="result-actions">
+        <button class="result-btn secondary" onclick="hideResult()">非公開で保存</button>
+        <button class="result-btn primary">公開して投稿 🚶</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function showResult() {
+    document.getElementById('praiseOverlay').classList.add('show');
+  }
+  function hideResult() {
+    document.getElementById('praiseOverlay').classList.remove('show');
+  }
+
+  // タイマー（見た目だけ）
+  let sec = 23 * 60 + 14;
+  setInterval(() => {
+    sec++;
+    const m = String(Math.floor(sec / 60)).padStart(2, '0');
+    const s = String(sec % 60).padStart(2, '0');
+    document.getElementById('timer').textContent = `00:${m}:${s}`;
+  }, 1000);
+</script>
+</body>
+</html>

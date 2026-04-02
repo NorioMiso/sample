@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンポスター – きろく</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Kaisei+Decol:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --yellow: #FFD93D;
+    --green: #6BCB77;
+    --green-dark: #3D9E4A;
+    --coral: #FF6B6B;
+    --blue: #4ECDC4;
+    --purple: #C084FC;
+    --orange: #FB923C;
+    --ink: #1A1A2E;
+    --ink-soft: #555566;
+    --surface: #FFFFFF;
+    --border: #F0E8DC;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #FFE8D6;
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px 40px;
+  }
+
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    min-height: 844px;
+    border-radius: 48px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 28px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 22px 12px;
+  }
+
+  .header-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  /* 月切り替え */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 0 22px 14px;
+  }
+
+  .month-btn {
+    width: 32px;
+    height: 32px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 10px;
+    box-shadow: 2px 2px 0 var(--ink);
+    font-size: 14px;
+    font-weight: 900;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .month-btn:active {
+    transform: translate(1px,1px);
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+
+  .month-label {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+    min-width: 80px;
+    text-align: center;
+  }
+
+  /* 月サマリー */
+  .month-summary {
+    display: flex;
+    gap: 8px;
+    margin: 0 16px 14px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .summary-chip {
+    flex: 1;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 2px 2px 0 var(--ink);
+    padding: 10px 8px;
+    text-align: center;
+  }
+
+  .summary-chip.highlight {
+    background: var(--yellow);
+  }
+
+  .chip-value {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .chip-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  /* 表示切り替えタブ */
+  .view-toggle {
+    display: flex;
+    margin: 0 16px 14px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 2px 2px 0 var(--ink);
+    overflow: hidden;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
+  .toggle-btn.active {
+    background: var(--yellow);
+    color: var(--ink);
+    border-radius: 10px;
+    margin: 3px;
+  }
+
+  /* ===== カレンダービュー ===== */
+  .calendar-view {
+    margin: 0 16px 14px;
+    display: none;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .calendar-view.visible {
+    display: block;
+  }
+
+  .calendar-grid-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    margin-bottom: 6px;
+  }
+
+  .cal-day-label {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    padding: 4px 0;
+  }
+
+  .cal-day-label.sun { color: var(--coral); }
+  .cal-day-label.sat { color: var(--blue); }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-cell {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    cursor: pointer;
+    position: relative;
+    transition: transform 0.15s;
+  }
+
+  .cal-cell:active { transform: scale(0.9); }
+
+  .cal-cell.walked {
+    background: var(--surface);
+    border: 2px solid var(--ink);
+    color: var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .cal-cell.walked.long {
+    background: var(--green);
+  }
+
+  .cal-cell.walked.medium {
+    background: var(--yellow);
+  }
+
+  .cal-cell.walked.short {
+    background: #E8F5EB;
+  }
+
+  .cal-cell.today {
+    border: 2.5px solid var(--coral) !important;
+  }
+
+  .cal-cell.empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .cal-icon {
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  .cal-num {
+    font-size: 11px;
+    line-height: 1;
+  }
+
+  /* 凡例 */
+  .cal-legend {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 4px;
+    border: 1.5px solid var(--ink);
+  }
+
+  /* ===== リストビュー ===== */
+  .list-view {
+    margin: 0 16px;
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    animation: fadeUp 0.3s ease both;
+  }
+
+  .list-view.visible {
+    display: flex;
+  }
+
+  .walk-card {
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 3px 3px 0 var(--ink);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  .walk-card:active {
+    transform: translate(1px, 1px);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .walk-card-header {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px 10px;
+    gap: 12px;
+  }
+
+  .walk-date-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid var(--ink);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .walk-date-month {
+    font-size: 8px;
+    font-weight: 900;
+    color: var(--ink-soft);
+    line-height: 1;
+    letter-spacing: 0.05em;
+  }
+
+  .walk-date-day {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .walk-info {
+    flex: 1;
+  }
+
+  .walk-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .walk-distance {
+    font-size: 16px;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  .walk-tags {
+    display: flex;
+    gap: 4px;
+  }
+
+  .walk-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 8px;
+    border: 1.5px solid var(--ink);
+  }
+
+  .walk-tag.rain { background: #DBEAFE; color: #1e40af; }
+  .walk-tag.night { background: #EDE9FE; color: #5b21b6; }
+  .walk-tag.morning { background: #FEF9C3; color: #854d0e; }
+  .walk-tag.sunny { background: #DCFCE7; color: #166534; }
+
+  .walk-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+  }
+
+  /* 称えバナー */
+  .praise-banner {
+    margin: 0 14px 12px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .praise-banner-star {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .praise-banner-text {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.5;
+  }
+
+  /* 展開エリア */
+  .walk-detail {
+    display: none;
+    border-top: 2px solid var(--border);
+    padding: 12px 14px 14px;
+    gap: 10px;
+    flex-direction: column;
+  }
+
+  .walk-card.expanded .walk-detail {
+    display: flex;
+  }
+
+  .walk-map-placeholder {
+    height: 100px;
+    background: linear-gradient(135deg, #E8F5EB 0%, #D1EDD4 100%);
+    border-radius: 12px;
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--green-dark);
+    gap: 6px;
+  }
+
+  .walk-photos {
+    display: flex;
+    gap: 8px;
+  }
+
+  .walk-photo {
+    flex: 1;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    background: var(--bg);
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    margin-top: auto;
+    background: var(--surface);
+    border-top: 3px solid var(--ink);
+    display: flex;
+    padding: 12px 0 24px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-icon-wrap {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .nav-item.active .nav-icon-wrap {
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .nav-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+
+  .nav-item.active .nav-label {
+    color: var(--ink);
+  }
+
+  /* scroll area */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+  }
+
+  .scroll-area::-webkit-scrollbar { display: none; }
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>●●●</span>
+  </div>
+
+  <div class="header">
+    <div class="header-title">📍 きろく</div>
+  </div>
+
+  <!-- 月切り替え -->
+  <div class="month-nav">
+    <button class="month-btn">←</button>
+    <div class="month-label">2026年4月</div>
+    <button class="month-btn">→</button>
+  </div>
+
+  <!-- 月サマリー -->
+  <div class="month-summary">
+    <div class="summary-chip highlight">
+      <div class="chip-value">18回</div>
+      <div class="chip-label">散歩した日</div>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-value">62.4km</div>
+      <div class="chip-label">合計距離</div>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-value">3.5km</div>
+      <div class="chip-label">平均距離</div>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-value">12🔥</div>
+      <div class="chip-label">最長連続</div>
+    </div>
+  </div>
+
+  <!-- 切り替えタブ -->
+  <div class="view-toggle">
+    <button class="toggle-btn" id="calBtn" onclick="switchView('calendar')">📅 カレンダー</button>
+    <button class="toggle-btn active" id="listBtn" onclick="switchView('list')">📋 リスト</button>
+  </div>
+
+  <div class="scroll-area">
+
+    <!-- カレンダービュー -->
+    <div class="calendar-view" id="calendarView">
+      <div class="calendar-grid-header">
+        <div class="cal-day-label sun">日</div>
+        <div class="cal-day-label">月</div>
+        <div class="cal-day-label">火</div>
+        <div class="cal-day-label">水</div>
+        <div class="cal-day-label">木</div>
+        <div class="cal-day-label">金</div>
+        <div class="cal-day-label sat">土</div>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+      <div class="cal-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#6BCB77"></div>5km以上
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#FFD93D"></div>3〜5km
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#E8F5EB"></div>〜3km
+        </div>
+      </div>
+    </div>
+
+    <!-- リストビュー -->
+    <div class="list-view visible" id="listView">
+
+      <!-- 4/1 -->
+      <div class="walk-card expanded" onclick="toggleCard(this)">
+        <div class="walk-card-header">
+          <div class="walk-date-badge" style="background:#FEF9C3">
+            <div class="walk-date-month">APR</div>
+            <div class="walk-date-day">1</div>
+          </div>
+          <div class="walk-info">
+            <div class="walk-title-row">
+              <div class="walk-distance">4.2km</div>
+              <div class="walk-tags">
+                <span class="walk-tag rain">🌧️ 雨</span>
+                <span class="walk-tag night">🌙 深夜</span>
+              </div>
+            </div>
+            <div class="walk-meta">23:14スタート　51分</div>
+          </div>
+        </div>
+        <div class="praise-banner">
+          <span class="praise-banner-star">⭐</span>
+          <div class="praise-banner-text">雨の深夜に歩いた距離、全ユーザー中5位です。</div>
+        </div>
+        <div class="walk-detail">
+          <div class="walk-map-placeholder">🗺️ ルートを見る</div>
+          <div class="walk-photos">
+            <div class="walk-photo">🌧️</div>
+            <div class="walk-photo">🐱</div>
+            <div class="walk-photo">🏮</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3/31 -->
+      <div class="walk-card" onclick="toggleCard(this)">
+        <div class="walk-card-header">
+          <div class="walk-date-badge" style="background:#DCFCE7">
+            <div class="walk-date-month">MAR</div>
+            <div class="walk-date-day">31</div>
+          </div>
+          <div class="walk-info">
+            <div class="walk-title-row">
+              <div class="walk-distance">6.8km</div>
+              <div class="walk-tags">
+                <span class="walk-tag sunny">☀️ 晴れ</span>
+                <span class="walk-tag morning">🌅 朝</span>
+              </div>
+            </div>
+            <div class="walk-meta">07:02スタート　82分</div>
+          </div>
+        </div>
+        <div class="praise-banner">
+          <span class="praise-banner-star">⭐</span>
+          <div class="praise-banner-text">月曜の朝に歩いた距離、今月あなたが最長です。</div>
+        </div>
+        <div class="walk-detail">
+          <div class="walk-map-placeholder">🗺️ ルートを見る</div>
+          <div class="walk-photos">
+            <div class="walk-photo">🌸</div>
+            <div class="walk-photo">🌤️</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3/29 -->
+      <div class="walk-card" onclick="toggleCard(this)">
+        <div class="walk-card-header">
+          <div class="walk-date-badge" style="background:#EDE9FE">
+            <div class="walk-date-month">MAR</div>
+            <div class="walk-date-day">29</div>
+          </div>
+          <div class="walk-info">
+            <div class="walk-title-row">
+              <div class="walk-distance">3.1km</div>
+              <div class="walk-tags">
+                <span class="walk-tag night">🌙 深夜</span>
+              </div>
+            </div>
+            <div class="walk-meta">22:40スタート　38分</div>
+          </div>
+        </div>
+        <div class="praise-banner">
+          <span class="praise-banner-star">⭐</span>
+          <div class="praise-banner-text">30代の中で10時台に3番目に長く歩いた日です。</div>
+        </div>
+        <div class="walk-detail">
+          <div class="walk-map-placeholder">🗺️ ルートを見る</div>
+        </div>
+      </div>
+
+      <!-- 3/27 -->
+      <div class="walk-card" onclick="toggleCard(this)">
+        <div class="walk-card-header">
+          <div class="walk-date-badge" style="background:#FFF8F0">
+            <div class="walk-date-month">MAR</div>
+            <div class="walk-date-day">27</div>
+          </div>
+          <div class="walk-info">
+            <div class="walk-title-row">
+              <div class="walk-distance">2.4km</div>
+              <div class="walk-tags">
+                <span class="walk-tag sunny">☀️ 晴れ</span>
+              </div>
+            </div>
+            <div class="walk-meta">15:30スタート　29分</div>
+          </div>
+        </div>
+        <div class="praise-banner">
+          <span class="praise-banner-star">⭐</span>
+          <div class="praise-banner-text">土曜の午後に歩いた回数、今月トップです。</div>
+        </div>
+        <div class="walk-detail">
+          <div class="walk-map-placeholder">🗺️ ルートを見る</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <div class="nav-item">
+      <div class="nav-icon-wrap">🏠</div>
+      <span class="nav-label">ホーム</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon-wrap">🗺️</div>
+      <span class="nav-label">さんぽを探す</span>
+    </div>
+    <div class="nav-item active">
+      <div class="nav-icon-wrap">📍</div>
+      <span class="nav-label">きろく</span>
+    </div>
+    <div class="nav-item">
+      <div class="nav-icon-wrap">👤</div>
+      <span class="nav-label">マイページ</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // カレンダー生成
+  const walkedDays = {
+    1: { type: 'short', icon: '🌧️' },
+    3: { type: 'medium', icon: '🚶' },
+    5: { type: 'long', icon: '☀️' },
+    7: { type: 'short', icon: '🌙' },
+    8: { type: 'medium', icon: '🚶' },
+    10: { type: 'long', icon: '🌸' },
+    12: { type: 'short', icon: '🚶' },
+    14: { type: 'medium', icon: '☀️' },
+    15: { type: 'long', icon: '🌅' },
+    17: { type: 'short', icon: '🌧️' },
+    19: { type: 'medium', icon: '🚶' },
+    21: { type: 'long', icon: '☀️' },
+    22: { type: 'short', icon: '🌙' },
+    24: { type: 'medium', icon: '🚶' },
+    26: { type: 'long', icon: '🌸' },
+    28: { type: 'short', icon: '🚶' },
+    29: { type: 'medium', icon: '🌙' },
+    30: { type: 'long', icon: '☀️' },
+  };
+
+  const grid = document.getElementById('calGrid');
+  // April 2026 starts on Wednesday (index 3)
+  const startDay = 3;
+  const daysInMonth = 30;
+  const today = 1;
+
+  for (let i = 0; i < startDay; i++) {
+    const empty = document.createElement('div');
+    empty.className = 'cal-cell empty';
+    grid.appendChild(empty);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cell = document.createElement('div');
+    const walked = walkedDays[d];
+    if (walked) {
+      cell.className = `cal-cell walked ${walked.type}${d === today ? ' today' : ''}`;
+      cell.innerHTML = `<span class="cal-icon">${walked.icon}</span><span class="cal-num">${d}</span>`;
+    } else {
+      cell.className = `cal-cell${d === today ? ' today' : ''}`;
+      cell.innerHTML = `<span class="cal-num">${d}</span>`;
+    }
+    grid.appendChild(cell);
+  }
+
+  // ビュー切り替え
+  function switchView(view) {
+    const calView = document.getElementById('calendarView');
+    const listView = document.getElementById('listView');
+    const calBtn = document.getElementById('calBtn');
+    const listBtn = document.getElementById('listBtn');
+
+    if (view === 'calendar') {
+      calView.classList.add('visible');
+      listView.classList.remove('visible');
+      calBtn.classList.add('active');
+      listBtn.classList.remove('active');
+    } else {
+      listView.classList.add('visible');
+      calView.classList.remove('visible');
+      listBtn.classList.add('active');
+      calBtn.classList.remove('active');
+    }
+  }
+
+  // カード展開
+  function toggleCard(card) {
+    card.classList.toggle('expanded');
+  }
+</script>
+</body>
+</html>

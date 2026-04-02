@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>サンポスター – マイページ</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Kaisei+Decol:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #FFF8F0;
+    --yellow: #FFD93D;
+    --green: #6BCB77;
+    --green-dark: #3D9E4A;
+    --coral: #FF6B6B;
+    --blue: #4ECDC4;
+    --ink: #1A1A2E;
+    --ink-soft: #555566;
+    --surface: #FFFFFF;
+    --border: #F0E8DC;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: #FFE8D6;
+    font-family: 'Nunito', sans-serif;
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 24px 16px 40px;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .phone {
+    width: 390px;
+    background: var(--bg);
+    min-height: 844px;
+    border-radius: 48px;
+    overflow: hidden;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .phone-label {
+    text-align: center;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    letter-spacing: 0.08em;
+  }
+
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .status-bar {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 28px 8px;
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+
+  /* ヘッダー */
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 22px 16px;
+  }
+
+  .header-title {
+    font-family: 'Kaisei Decol', serif;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  .settings-btn {
+    width: 36px;
+    height: 36px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 12px;
+    box-shadow: 2px 2px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+  }
+
+  /* プロフィールヘッダー */
+  .profile-header {
+    margin: 0 16px 16px;
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 24px;
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 20px;
+  }
+
+  .profile-top {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .profile-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: var(--yellow);
+    border: 3px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    flex-shrink: 0;
+    position: relative;
+  }
+
+  .edit-icon {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    width: 22px;
+    height: 22px;
+    background: var(--green);
+    border: 2px solid var(--ink);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+
+  .profile-info {
+    flex: 1;
+  }
+
+  .profile-name {
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .profile-since {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 6px;
+  }
+
+  .favorite-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    cursor: pointer;
+  }
+
+  .favorite-btn.mine {
+    background: var(--surface);
+    color: var(--ink-soft);
+    box-shadow: none;
+    border-color: var(--border);
+  }
+
+  .profile-stats {
+    display: flex;
+    gap: 0;
+    border-top: 2px solid var(--border);
+    padding-top: 14px;
+  }
+
+  .profile-stat {
+    flex: 1;
+    text-align: center;
+    border-right: 2px solid var(--border);
+  }
+
+  .profile-stat:last-child {
+    border-right: none;
+  }
+
+  .profile-stat-value {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--ink);
+  }
+
+  .profile-stat-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink-soft);
+    margin-top: 2px;
+  }
+
+  /* スクロールエリア */
+  .scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 16px;
+  }
+  .scroll-area::-webkit-scrollbar { display: none; }
+
+  /* セクション */
+  .section {
+    margin: 0 16px 16px;
+  }
+
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--ink);
+    letter-spacing: 0.05em;
+  }
+
+  .section-link {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--green-dark);
+    text-decoration: none;
+  }
+
+  /* 殿堂入り称え */
+  .hall-card {
+    background: var(--yellow);
+    border: 2.5px solid var(--ink);
+    border-radius: 18px;
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 16px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .hall-star {
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+
+  .hall-text {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .hall-date {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  .hall-pin {
+    font-size: 14px;
+    flex-shrink: 0;
+    opacity: 0.5;
+    cursor: pointer;
+  }
+
+  .hall-pin.pinned {
+    opacity: 1;
+  }
+
+  /* バッジ */
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+
+  .badge-item {
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 14px;
+    box-shadow: 2px 2px 0 var(--ink);
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .badge-item.locked {
+    background: var(--border);
+    border-color: #ccc;
+    box-shadow: none;
+    opacity: 0.5;
+  }
+
+  .badge-emoji {
+    font-size: 22px;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .badge-name {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.3;
+  }
+
+  /* コース一覧 */
+  .course-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .course-card {
+    background: var(--surface);
+    border: 2.5px solid var(--ink);
+    border-radius: 16px;
+    box-shadow: 3px 3px 0 var(--ink);
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+  }
+
+  .course-map-thumb {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, #E8F5EB, #C8DFC0);
+    border: 2px solid var(--ink);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .course-info {
+    flex: 1;
+  }
+
+  .course-name {
+    font-size: 13px;
+    font-weight: 900;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .course-meta {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+
+  .course-tags {
+    display: flex;
+    gap: 4px;
+  }
+
+  .course-tag {
+    font-size: 9px;
+    font-weight: 800;
+    padding: 2px 7px;
+    border-radius: 8px;
+    border: 1.5px solid var(--ink);
+    background: var(--bg);
+  }
+
+  .course-nice {
+    font-size: 12px;
+    font-weight: 900;
+    color: var(--ink-soft);
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* お気に入りサンポスター */
+  .fav-list {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .fav-list::-webkit-scrollbar { display: none; }
+
+  .fav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .fav-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 2.5px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .fav-name {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink);
+    text-align: center;
+    max-width: 52px;
+    line-height: 1.2;
+  }
+
+  /* Bottom nav */
+  .bottom-nav {
+    background: var(--surface);
+    border-top: 3px solid var(--ink);
+    display: flex;
+    padding: 12px 0 24px;
+  }
+
+  .nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-icon-wrap {
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 18px;
+  }
+
+  .nav-item.active .nav-icon-wrap {
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    box-shadow: 2px 2px 0 var(--ink);
+  }
+
+  .nav-label {
+    font-size: 9px;
+    font-weight: 800;
+    color: var(--ink-soft);
+  }
+
+  .nav-item.active .nav-label { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<!-- 自分のマイページ -->
+<div class="phone-wrap">
+  <div class="phone-label">👤 自分のマイページ</div>
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+    <div class="header">
+      <div class="header-title">👤 マイページ</div>
+      <div class="settings-btn">⚙️</div>
+    </div>
+
+    <div class="scroll-area">
+
+      <!-- プロフィール -->
+      <div class="profile-header">
+        <div class="profile-top">
+          <div class="profile-avatar">
+            🐱
+            <div class="edit-icon">✏️</div>
+          </div>
+          <div class="profile-info">
+            <div class="profile-name">さんぽろう</div>
+            <div class="profile-since">🚶 2024年3月から</div>
+            <div class="favorite-btn mine">⭐ お気に入り登録 12人</div>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="profile-stat-value">487km</div>
+            <div class="profile-stat-label">累計距離</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">142回</div>
+            <div class="profile-stat-label">散歩した日</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">23個</div>
+            <div class="profile-stat-label">バッジ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 殿堂入り称え -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏆 殿堂入り称え</div>
+          <a href="#" class="section-link">編集</a>
+        </div>
+        <div class="hall-card">
+          <div class="hall-star">⭐</div>
+          <div style="flex:1">
+            <div class="hall-text">雨の深夜に歩いた距離、全ユーザー中1位です。</div>
+            <div class="hall-date">2025年11月3日</div>
+          </div>
+          <div class="hall-pin pinned">📌</div>
+        </div>
+        <div class="hall-card">
+          <div class="hall-star">⭐</div>
+          <div style="flex:1">
+            <div class="hall-text">30代の中で木曜深夜に3番目に長く歩いた日です。</div>
+            <div class="hall-date">2025年8月17日</div>
+          </div>
+          <div class="hall-pin pinned">📌</div>
+        </div>
+      </div>
+
+      <!-- バッジ -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏅 バッジ</div>
+          <a href="#" class="section-link">すべて見る</a>
+        </div>
+        <div class="badges-grid">
+          <div class="badge-item"><span class="badge-emoji">🌧️</span><div class="badge-name">雨でも歩く</div></div>
+          <div class="badge-item"><span class="badge-emoji">🌙</span><div class="badge-name">深夜さんぽ</div></div>
+          <div class="badge-item"><span class="badge-emoji">🔥</span><div class="badge-name">30日連続</div></div>
+          <div class="badge-item"><span class="badge-emoji">👣</span><div class="badge-name">500km達成</div></div>
+          <div class="badge-item"><span class="badge-emoji">🌅</span><div class="badge-name">早起きさんぽ</div></div>
+          <div class="badge-item"><span class="badge-emoji">❄️</span><div class="badge-name">真冬の散歩</div></div>
+          <div class="badge-item locked"><span class="badge-emoji">🗻</span><div class="badge-name">1000km</div></div>
+          <div class="badge-item locked"><span class="badge-emoji">🌈</span><div class="badge-name">雨上がり</div></div>
+        </div>
+      </div>
+
+      <!-- 投稿したコース -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🗺️ 投稿したコース</div>
+          <a href="#" class="section-link">すべて見る</a>
+        </div>
+        <div class="course-list">
+          <div class="course-card">
+            <div class="course-map-thumb">🌸</div>
+            <div class="course-info">
+              <div class="course-name">夜の住宅街ぐるり</div>
+              <div class="course-meta">3.2km　約38分</div>
+              <div class="course-tags">
+                <span class="course-tag">🌙 夜</span>
+                <span class="course-tag">🐱 猫スポット</span>
+              </div>
+            </div>
+            <div class="course-nice">👟 24</div>
+          </div>
+          <div class="course-card">
+            <div class="course-map-thumb">🌳</div>
+            <div class="course-info">
+              <div class="course-name">公園ぐるっと朝さんぽ</div>
+              <div class="course-meta">5.1km　約62分</div>
+              <div class="course-tags">
+                <span class="course-tag">🌅 朝</span>
+              </div>
+            </div>
+            <div class="course-nice">👟 41</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- お気に入りサンポスター -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">⭐ お気に入りサンポスター</div>
+          <a href="#" class="section-link">すべて見る</a>
+        </div>
+        <div class="fav-list">
+          <div class="fav-item">
+            <div class="fav-avatar" style="background:#FFD93D">🐶</div>
+            <div class="fav-name">あるくん</div>
+          </div>
+          <div class="fav-item">
+            <div class="fav-avatar" style="background:#4ECDC4">🦊</div>
+            <div class="fav-name">よるさんぽ子</div>
+          </div>
+          <div class="fav-item">
+            <div class="fav-avatar" style="background:#6BCB77">🐻</div>
+            <div class="fav-name">あさひ</div>
+          </div>
+          <div class="fav-item">
+            <div class="fav-avatar" style="background:#FF6B6B">🐰</div>
+            <div class="fav-name">ゆっくり太郎</div>
+          </div>
+          <div class="fav-item">
+            <div class="fav-avatar" style="background:#C084FC">🐼</div>
+            <div class="fav-name">まちかど探偵</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon-wrap">🏠</div><span class="nav-label">ホーム</span></div>
+      <div class="nav-item"><div class="nav-icon-wrap">🗺️</div><span class="nav-label">さんぽを探す</span></div>
+      <div class="nav-item"><div class="nav-icon-wrap">📍</div><span class="nav-label">きろく</span></div>
+      <div class="nav-item active"><div class="nav-icon-wrap">👤</div><span class="nav-label">マイページ</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 他人のプロフィールページ -->
+<div class="phone-wrap">
+  <div class="phone-label">👀 他のユーザーから見たページ</div>
+  <div class="phone">
+    <div class="status-bar"><span>9:41</span><span>●●●</span></div>
+
+    <div class="header">
+      <div class="header-title">← さんぽろう</div>
+    </div>
+
+    <div class="scroll-area">
+
+      <!-- プロフィール -->
+      <div class="profile-header">
+        <div class="profile-top">
+          <div class="profile-avatar">🐱</div>
+          <div class="profile-info">
+            <div class="profile-name">さんぽろう</div>
+            <div class="profile-since">🚶 2024年3月から</div>
+            <div class="favorite-btn">⭐ お気に入り登録する</div>
+          </div>
+        </div>
+        <div class="profile-stats">
+          <div class="profile-stat">
+            <div class="profile-stat-value">487km</div>
+            <div class="profile-stat-label">累計距離</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">142回</div>
+            <div class="profile-stat-label">散歩した日</div>
+          </div>
+          <div class="profile-stat">
+            <div class="profile-stat-value">23個</div>
+            <div class="profile-stat-label">バッジ</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 殿堂入り称え -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏆 殿堂入り称え</div>
+        </div>
+        <div class="hall-card">
+          <div class="hall-star">⭐</div>
+          <div>
+            <div class="hall-text">雨の深夜に歩いた距離、全ユーザー中1位です。</div>
+            <div class="hall-date">2025年11月3日</div>
+          </div>
+        </div>
+        <div class="hall-card">
+          <div class="hall-star">⭐</div>
+          <div>
+            <div class="hall-text">30代の中で木曜深夜に3番目に長く歩いた日です。</div>
+            <div class="hall-date">2025年8月17日</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- バッジ -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🏅 獲得バッジ</div>
+        </div>
+        <div class="badges-grid">
+          <div class="badge-item"><span class="badge-emoji">🌧️</span><div class="badge-name">雨でも歩く</div></div>
+          <div class="badge-item"><span class="badge-emoji">🌙</span><div class="badge-name">深夜さんぽ</div></div>
+          <div class="badge-item"><span class="badge-emoji">🔥</span><div class="badge-name">30日連続</div></div>
+          <div class="badge-item"><span class="badge-emoji">👣</span><div class="badge-name">500km達成</div></div>
+          <div class="badge-item"><span class="badge-emoji">🌅</span><div class="badge-name">早起きさんぽ</div></div>
+          <div class="badge-item"><span class="badge-emoji">❄️</span><div class="badge-name">真冬の散歩</div></div>
+        </div>
+      </div>
+
+      <!-- 投稿したコース -->
+      <div class="section">
+        <div class="section-header">
+          <div class="section-title">🗺️ 投稿したコース</div>
+        </div>
+        <div class="course-list">
+          <div class="course-card">
+            <div class="course-map-thumb">🌸</div>
+            <div class="course-info">
+              <div class="course-name">夜の住宅街ぐるり</div>
+              <div class="course-meta">3.2km　約38分</div>
+              <div class="course-tags">
+                <span class="course-tag">🌙 夜</span>
+                <span class="course-tag">🐱 猫スポット</span>
+              </div>
+            </div>
+            <div class="course-nice">👟 24</div>
+          </div>
+          <div class="course-card">
+            <div class="course-map-thumb">🌳</div>
+            <div class="course-info">
+              <div class="course-name">公園ぐるっと朝さんぽ</div>
+              <div class="course-meta">5.1km　約62分</div>
+              <div class="course-tags">
+                <span class="course-tag">🌅 朝</span>
+              </div>
+            </div>
+            <div class="course-nice">👟 41</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="bottom-nav">
+      <div class="nav-item"><div class="nav-icon-wrap">🏠</div><span class="nav-label">ホーム</span></div>
+      <div class="nav-item"><div class="nav-icon-wrap">🗺️</div><span class="nav-label">さんぽを探す</span></div>
+      <div class="nav-item"><div class="nav-icon-wrap">📍</div><span class="nav-label">きろく</span></div>
+      <div class="nav-item active"><div class="nav-icon-wrap">👤</div><span class="nav-label">マイページ</span></div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
