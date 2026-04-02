@@ -1,54 +1,69 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Kaisei+Decol:wght@400;700&display=swap');
 @import "tailwindcss";
 
 /* =============================================
-   sanpostar design system
-   ネオブルータリスト × ほぼ日ポップ
+   サンポスター design system
+   ネオブルータリスト × ポップ
    ============================================= */
 
 :root {
-  --yellow:  #FFD93D;
-  --green:   #6BCB77;
-  --coral:   #FF6B6B;
-  --black:   #111111;
-  --white:   #FFFFFF;
-  --bg:      #FFFDF0;
-  --border:  2px solid var(--black);
-  --shadow:  4px 4px 0 var(--black);
-  --shadow-sm: 2px 2px 0 var(--black);
-  --radius:  8px;
+  --yellow:    #FFD93D;
+  --green:     #6BCB77;
+  --green-dark:#3D9E4A;
+  --coral:     #FF6B6B;
+  --blue:      #4ECDC4;
+  --ink:       #1A1A2E;
+  --ink-soft:  #555566;
+  --white:     #FFFFFF;
+  --bg:        #FFF8F0;
+  --surface:   #FFFFFF;
+  --border-color: #1A1A2E;
+  --border:    2px solid var(--ink);
+  --shadow:    4px 4px 0 var(--ink);
+  --shadow-sm: 2px 2px 0 var(--ink);
+  --shadow-lg: 5px 5px 0 var(--ink);
+  --radius:    16px;
+  --radius-sm: 10px;
+  --radius-lg: 24px;
 }
 
 @theme inline {
-  --color-yellow:  #FFD93D;
-  --color-green:   #6BCB77;
-  --color-coral:   #FF6B6B;
-  --color-bg:      #FFFDF0;
+  --color-yellow:   #FFD93D;
+  --color-green:    #6BCB77;
+  --color-coral:    #FF6B6B;
+  --color-blue:     #4ECDC4;
+  --color-bg:       #FFF8F0;
+  --color-ink:      #1A1A2E;
   --font-sans: 'Nunito', sans-serif;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   background-color: var(--bg);
-  color: var(--black);
+  color: var(--ink);
   font-family: 'Nunito', sans-serif;
 }
 
-/* ---- ネオブルータリスト ユーティリティ ---- */
+/* ---- カード ---- */
 
 .nb-card {
-  background: var(--white);
+  background: var(--surface);
   border: var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
 }
+
+.nb-card-lg {
+  background: var(--surface);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ---- ボタン ---- */
 
 .nb-btn {
   display: inline-flex;
@@ -56,16 +71,17 @@ body {
   justify-content: center;
   gap: 0.5rem;
   font-family: 'Nunito', sans-serif;
-  font-weight: 800;
+  font-weight: 900;
   font-size: 0.95rem;
   border: var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
-  padding: 0.6rem 1.4rem;
+  padding: 0.65rem 1.4rem;
   cursor: pointer;
   transition: transform 0.08s, box-shadow 0.08s;
   text-decoration: none;
   white-space: nowrap;
+  letter-spacing: 0.02em;
 }
 
 .nb-btn:active {
@@ -73,11 +89,12 @@ body {
   box-shadow: none;
 }
 
-.nb-btn-yellow  { background: var(--yellow); color: var(--black); }
-.nb-btn-green   { background: var(--green);  color: var(--black); }
-.nb-btn-coral   { background: var(--coral);  color: var(--black); }
-.nb-btn-white   { background: var(--white);  color: var(--black); }
-.nb-btn-black   { background: var(--black);  color: var(--white); }
+.nb-btn-yellow  { background: var(--yellow); color: var(--ink); }
+.nb-btn-green   { background: var(--green);  color: var(--ink); }
+.nb-btn-coral   { background: var(--coral);  color: var(--ink); }
+.nb-btn-blue    { background: var(--blue);   color: var(--ink); }
+.nb-btn-white   { background: var(--white);  color: var(--ink); }
+.nb-btn-black   { background: var(--ink);    color: var(--white); }
 
 .nb-btn:disabled {
   opacity: 0.5;
@@ -86,40 +103,79 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+/* ---- インプット ---- */
+
 .nb-input {
   width: 100%;
   font-family: 'Nunito', sans-serif;
   font-size: 0.95rem;
   font-weight: 600;
   border: var(--border);
-  border-radius: var(--radius);
+  border-radius: var(--radius-sm);
   padding: 0.65rem 0.9rem;
-  background: var(--white);
-  color: var(--black);
+  background: var(--surface);
+  color: var(--ink);
   outline: none;
   transition: box-shadow 0.1s;
 }
 
-.nb-input:focus {
-  box-shadow: var(--shadow-sm);
-}
+.nb-input:focus { box-shadow: var(--shadow-sm); }
 
 .nb-input::placeholder {
-  color: #aaa;
+  color: var(--ink-soft);
   font-weight: 400;
 }
+
+/* ---- ラベル ---- */
 
 .nb-label {
   display: block;
   font-weight: 800;
   font-size: 0.85rem;
   margin-bottom: 0.35rem;
-  color: var(--black);
+  color: var(--ink);
 }
+
+/* ---- エラー ---- */
 
 .nb-error {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--coral);
   margin-top: 0.3rem;
+}
+
+/* ---- タイポグラフィ ---- */
+
+.font-display {
+  font-family: 'Kaisei Decol', serif;
+}
+
+/* ---- セクションヘッダー ---- */
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.625rem;
+}
+
+.section-title {
+  font-size: 0.8125rem;
+  font-weight: 900;
+  color: var(--ink);
+  letter-spacing: 0.05em;
+}
+
+.section-link {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--green-dark);
+  text-decoration: none;
+}
+
+/* ---- ボトムナビ余白 ---- */
+
+.has-bottom-nav {
+  padding-bottom: 80px;
 }
