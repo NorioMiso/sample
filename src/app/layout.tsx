@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'sanpostar',
-  description: '歩くだけで、必ずあなたが一位になれる瞬間がある',
+  title: 'サンポスター',
+  description: '歩き出したら誰もが何かしらのサンポスター★',
 }
 
 export default function RootLayout({

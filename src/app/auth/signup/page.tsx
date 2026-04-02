@@ -12,10 +12,18 @@ export default async function SignupPage({ searchParams }: Props) {
     <main className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-sm">
         {/* ロゴ */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-black tracking-tight">sanpostar</h1>
+        <div className="text-center mb-6">
+          <h1 className="text-4xl font-black tracking-tight">サンポスター</h1>
           <p className="text-sm font-semibold mt-1 text-gray-500">
-            歩くだけで、必ずあなたが一位になれる瞬間がある
+            歩き出したら誰もが何かしらのサンポスター★
+          </p>
+        </div>
+
+        {/* サンポスターとは */}
+        <div className="nb-card p-4 mb-5" style={{ background: 'var(--yellow)' }}>
+          <p className="font-black text-sm mb-1">サンポスターとは</p>
+          <p className="text-sm leading-relaxed text-gray-700">
+            散歩をすると、サンポスターが何かしらの観点で称えてくれます。また、ほかの散歩人（サンポビト）があなたの散歩を称えてくれることもあります。
           </p>
         </div>
 

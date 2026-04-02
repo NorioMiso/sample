@@ -46,7 +46,7 @@ export default async function HomePage() {
 
       {/* ヘッダー */}
       <div className="flex items-center justify-between pt-4">
-        <h1 className="text-2xl font-black">sanpostar</h1>
+        <h1 className="text-2xl font-black">サンポスター</h1>
         <div className="flex items-center gap-2">
           <Link href="/notifications" className="relative p-2">
             <span className="text-xl">🔔</span>
@@ -113,7 +113,9 @@ export default async function HomePage() {
         <div className="nb-card p-4 text-center"
              style={{ background: 'var(--bg)' }}>
           <p className="text-sm font-semibold text-gray-500">
-            まだ散歩の記録がありません。さあ歩きましょう！
+            {recentWalks && recentWalks.length > 0
+              ? '累計データを集計中です。次の散歩後に反映されます！'
+              : 'さあ、最初の散歩に出発しましょう！'}
           </p>
         </div>
       )}
