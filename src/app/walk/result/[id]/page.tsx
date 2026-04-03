@@ -10,6 +10,11 @@ const WEATHER_ICON: Record<string, string> = {
   snowy: '🌨️', foggy: '🌫️', windy: '💨',
 }
 
+const WEATHER_LABEL: Record<string, string> = {
+  sunny: '晴れ', cloudy: '曇り', rainy: '雨',
+  snowy: '雪', foggy: '霧', windy: '風',
+}
+
 export default async function WalkResultPage({ params }: Props) {
   const { id } = await params
   const supabase = await createClient()
@@ -37,31 +42,44 @@ export default async function WalkResultPage({ params }: Props) {
     .eq('walk_record_id', id)
     .maybeSingle()
 
-  // 直近2分以内に獲得したバッジ（この散歩で新たに解除されたもの）
   const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString()
   const { data: newBadges } = await supabase
     .from('user_badges')
-    .select('badge_id, earned_at, badges(slug, name, description, category)')
+    .select('badge_id, earned_at, badges(slug, name, description)')
     .eq('user_id', record.user_id)
     .gte('earned_at', twoMinutesAgo)
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-6 gap-6">
-      <div className="text-center">
-        <div className="text-5xl mb-3">🎉</div>
-        <h2 className="text-2xl font-black">記録しました！</h2>
+    <main
+      className="min-h-screen flex flex-col max-w-sm mx-auto"
+      style={{ padding: '0 16px calc(32px + env(safe-area-inset-bottom))' }}
+    >
+      {/* ヘッダー */}
+      <div style={{ padding: '20px 4px 16px', textAlign: 'center' }}>
+        <div style={{ fontSize: 52, marginBottom: 8 }}>🎉</div>
+        <h1 style={{
+          fontFamily: "'Kaisei Decol', serif",
+          fontSize: 24, fontWeight: 700, color: 'var(--ink)',
+        }}>
+          さんぽ完了！
+        </h1>
       </div>
 
       {/* AI称え */}
       {praise && (
-        <div
-          className="nb-card p-5 w-full max-w-sm"
-          style={{ background: 'var(--green)' }}
-        >
-          <p className="text-xs font-black text-gray-700 mb-2">✨ 今日の称え</p>
-          <p className="font-black text-base leading-relaxed">{praise.praise_text}</p>
+        <div style={{
+          background: 'var(--green)', border: '2.5px solid var(--ink)',
+          borderRadius: 20, boxShadow: '4px 4px 0 var(--ink)',
+          padding: '18px 16px', marginBottom: 14,
+        }}>
+          <p style={{ fontSize: 11, fontWeight: 900, color: '#166534', letterSpacing: '0.08em', marginBottom: 8 }}>
+            ✨ 今日の称え
+          </p>
+          <p style={{ fontSize: 15, fontWeight: 800, color: 'var(--ink)', lineHeight: 1.6 }}>
+            {praise.praise_text}
+          </p>
           {praise.rank && praise.total_count && (
-            <p className="text-xs font-semibold text-gray-600 mt-2 text-right">
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#166534', marginTop: 8, textAlign: 'right' }}>
               {praise.rank}位 / {praise.total_count}人中
             </p>
           )}
@@ -70,21 +88,21 @@ export default async function WalkResultPage({ params }: Props) {
 
       {/* 新バッジ */}
       {newBadges && newBadges.length > 0 && (
-        <div className="w-full max-w-sm flex flex-col gap-2">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
           {newBadges.map(ub => {
             const badge = Array.isArray(ub.badges) ? ub.badges[0] : ub.badges
             if (!badge) return null
             return (
-              <div
-                key={ub.badge_id}
-                className="nb-card p-4 flex items-center gap-3"
-                style={{ background: 'var(--yellow)' }}
-              >
-                <span className="text-3xl">🏅</span>
+              <div key={ub.badge_id} style={{
+                background: 'var(--yellow)', border: '2.5px solid var(--ink)',
+                borderRadius: 18, boxShadow: '3px 3px 0 var(--ink)',
+                padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <span style={{ fontSize: 32 }}>🏅</span>
                 <div>
-                  <p className="text-xs font-black text-gray-600 mb-0.5">バッジ獲得！</p>
-                  <p className="font-black">{badge.name}</p>
-                  <p className="text-xs text-gray-600">{badge.description}</p>
+                  <p style={{ fontSize: 10, fontWeight: 900, color: 'var(--ink-soft)', marginBottom: 2 }}>バッジ獲得！</p>
+                  <p style={{ fontSize: 15, fontWeight: 900, color: 'var(--ink)' }}>{badge.name}</p>
+                  <p style={{ fontSize: 11, fontWeight: 600, color: 'var(--ink-soft)' }}>{badge.description}</p>
                 </div>
               </div>
             )
@@ -93,69 +111,92 @@ export default async function WalkResultPage({ params }: Props) {
       )}
 
       {/* 今回の記録 */}
-      <div className="nb-card p-5 w-full max-w-sm">
-        <h3 className="font-black text-sm text-gray-500 mb-3">今回の散歩</h3>
-        <div className="grid grid-cols-2 gap-4 text-center">
-          <div>
-            <p className="text-xs font-bold text-gray-400 mb-1">距離</p>
-            <p className="text-2xl font-black">
-              {formatDistance(record.distance_meters)}
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 mb-1">時間</p>
-            <p className="text-2xl font-black">
-              {formatDuration(record.duration_seconds)}
-            </p>
-          </div>
-          {record.weather && (
-            <div className="col-span-2">
-              <p className="text-xs font-bold text-gray-400 mb-1">天気</p>
-              <p className="text-2xl">{WEATHER_ICON[record.weather] ?? '—'}</p>
+      <div style={{
+        background: 'var(--surface)', border: '2.5px solid var(--ink)',
+        borderRadius: 20, boxShadow: '4px 4px 0 var(--ink)',
+        padding: '18px 16px', marginBottom: 14,
+      }}>
+        <p style={{ fontSize: 11, fontWeight: 900, color: 'var(--ink-soft)', letterSpacing: '0.08em', marginBottom: 14 }}>
+          今回のさんぽ
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, textAlign: 'center' }}>
+          {[
+            { label: '距離', value: formatDistance(record.distance_meters) },
+            { label: '時間', value: formatDuration(record.duration_seconds) },
+          ].map(item => (
+            <div key={item.label} style={{
+              background: 'var(--bg)', border: '2px solid #F0E8DC', borderRadius: 14, padding: 12,
+            }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--ink-soft)', marginBottom: 4 }}>{item.label}</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: 'var(--ink)' }}>{item.value}</div>
             </div>
-          )}
+          ))}
         </div>
+        {record.weather && (
+          <div style={{ marginTop: 12, textAlign: 'center' }}>
+            <span style={{ fontSize: 28 }}>{WEATHER_ICON[record.weather]}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--ink-soft)', marginLeft: 6 }}>
+              {WEATHER_LABEL[record.weather]}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* 累計 */}
       {stats && (
-        <div className="nb-card p-5 w-full max-w-sm"
-             style={{ background: 'var(--yellow)' }}>
-          <h3 className="font-black text-sm mb-3">累計記録</h3>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div>
-              <p className="text-xs font-bold text-gray-600 mb-1">合計距離</p>
-              <p className="text-lg font-black">
-                {(stats.total_distance_meters / 1000).toFixed(1)}<span className="text-xs">km</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-600 mb-1">散歩回数</p>
-              <p className="text-lg font-black">
-                {stats.total_walks}<span className="text-xs">回</span>
-              </p>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-gray-600 mb-1">連続日数</p>
-              <p className="text-lg font-black">
-                {stats.current_streak_days}<span className="text-xs">日</span>
-              </p>
-            </div>
+        <div style={{
+          background: 'var(--yellow)', border: '2.5px solid var(--ink)',
+          borderRadius: 20, boxShadow: '4px 4px 0 var(--ink)',
+          padding: '18px 16px', marginBottom: 20,
+        }}>
+          <p style={{ fontSize: 11, fontWeight: 900, color: 'var(--ink-soft)', letterSpacing: '0.08em', marginBottom: 14 }}>
+            累計きろく
+          </p>
+          <div style={{ display: 'flex', textAlign: 'center' }}>
+            {[
+              { label: '合計距離',  value: `${(stats.total_distance_meters / 1000).toFixed(1)}km` },
+              { label: '散歩回数',  value: `${stats.total_walks}回` },
+              { label: '連続日数',  value: `${stats.current_streak_days}🔥` },
+            ].map((item, i) => (
+              <div key={item.label} style={{
+                flex: 1,
+                borderRight: i < 2 ? '2px solid rgba(26,26,46,0.2)' : 'none',
+              }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--ink)' }}>{item.value}</div>
+                <div style={{ fontSize: 9, fontWeight: 800, color: 'var(--ink-soft)', marginTop: 2 }}>{item.label}</div>
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      <div className="flex flex-col gap-3 w-full max-w-sm">
-        <Link
-          href={`/courses/new?walk_record_id=${id}`}
-          className="nb-btn nb-btn-green w-full justify-center"
-        >
+      {/* アクション */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <Link href={`/courses/new?walk_record_id=${id}`} style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          padding: '16px', background: 'var(--green)',
+          border: '2.5px solid var(--ink)', borderRadius: 16,
+          fontSize: 15, fontWeight: 900, boxShadow: '4px 4px 0 var(--ink)',
+          textDecoration: 'none', color: 'var(--ink)',
+        }}>
           🗺️ このコースをシェアする
         </Link>
-        <Link href="/walk" className="nb-btn nb-btn-coral w-full justify-center">
+        <Link href="/walk" style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          padding: '14px', background: 'var(--coral)',
+          border: '2.5px solid var(--ink)', borderRadius: 16,
+          fontSize: 14, fontWeight: 900, boxShadow: '3px 3px 0 var(--ink)',
+          textDecoration: 'none', color: 'white',
+        }}>
           もう一度歩く 🚶
         </Link>
-        <Link href="/" className="nb-btn nb-btn-white w-full justify-center text-sm">
+        <Link href="/" style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '12px', background: 'var(--surface)',
+          border: '2.5px solid var(--ink)', borderRadius: 16,
+          fontSize: 13, fontWeight: 800, boxShadow: '2px 2px 0 var(--ink)',
+          textDecoration: 'none', color: 'var(--ink)',
+        }}>
           ホームへ戻る
         </Link>
       </div>
