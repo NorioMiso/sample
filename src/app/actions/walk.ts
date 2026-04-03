@@ -30,17 +30,22 @@ export async function saveWalk(input: SaveWalkInput) {
     .maybeSingle()
   if (!profile) redirect('/auth/setup')
 
+  const durationSeconds = Math.round(
+    (new Date(input.endedAt).getTime() - new Date(input.startedAt).getTime()) / 1000,
+  )
+
   // walk_records を INSERT
   const { data: record, error: recErr } = await supabase
     .from('walk_records')
     .insert({
-      user_id:         profile.id,
-      started_at:      input.startedAt,
-      ended_at:        input.endedAt,
-      distance_meters: input.distanceMeters,
-      time_of_day:     input.timeOfDay,
-      weather:         input.weather ?? undefined,
-      is_public:       input.isPublic,
+      user_id:          profile.id,
+      started_at:       input.startedAt,
+      ended_at:         input.endedAt,
+      duration_seconds: durationSeconds,
+      distance_meters:  input.distanceMeters,
+      time_of_day:      input.timeOfDay,
+      weather:          input.weather ?? undefined,
+      is_public:        input.isPublic,
     })
     .select('id')
     .single()
