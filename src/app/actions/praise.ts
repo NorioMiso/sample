@@ -22,12 +22,18 @@ const SYSTEM_PROMPT = `あなたはsanpostarの「称え師」です。
 「火曜日の夜に歩いた回数、今月あなたが最多です。」
 「曇りの夕方に歩いた累計距離、全体の3位に位置しています。」`
 
+/** APIキー不要のフォールバック称え文を生成する */
+function buildFallbackPraise(ranking: { conditionDescription: string; rank: number; totalCount: number }): string {
+  const { conditionDescription, rank, totalCount } = ranking
+  if (rank === 1)  return `${conditionDescription}、あなたがトップです。`
+  if (rank <= 3)   return `${conditionDescription}、${totalCount}人中${rank}位です。`
+  return `${conditionDescription}、${totalCount}人中${rank}位に入っています。`
+}
+
 export async function generateAndSavePraise(
   walkRecordId: string,
   userId: string,
 ): Promise<void> {
-  if (!process.env.ANTHROPIC_API_KEY) return  // APIキー未設定時はスキップ
-
   try {
     const supabase = await createClient()
 
@@ -44,34 +50,41 @@ export async function generateAndSavePraise(
     const rankings = await computeRankings(supabase, userId, walk)
     if (rankings.length === 0) return
 
-    // Claude API で称えを生成
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+    let praiseText: string
 
-    const userMessage = `以下の散歩データのランキングから、称えを1〜2文で生成してください。
+    if (process.env.ANTHROPIC_API_KEY) {
+      // Claude API で称えを生成
+      const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+
+      const userMessage = `以下の散歩データのランキングから、称えを1〜2文で生成してください。
 
 【今回の散歩】
 - 距離: ${formatDistance(walk.distance_meters)}
-- 時間: ${formatDuration(walk.duration_seconds)}
+- 時間: ${formatDuration(walk.duration_seconds ?? 0)}
 - 時間帯: ${walk.time_of_day}
 - 天気: ${walk.weather ?? '不明'}
 
 【ランキングデータ（最も印象的なものを選んでください）】
 ${rankings.map((r, i) => `${i + 1}. ${r.conditionDescription}：${r.rank}位 / ${r.totalCount}人中`).join('\n')}`
 
-    const response = await client.messages.create({
-      model:      'claude-opus-4-6',
-      max_tokens: 256,
-      system:     SYSTEM_PROMPT,
-      messages:   [{ role: 'user', content: userMessage }],
-    })
+      const response = await client.messages.create({
+        model:      'claude-haiku-4-5-20251001',
+        max_tokens: 256,
+        system:     SYSTEM_PROMPT,
+        messages:   [{ role: 'user', content: userMessage }],
+      })
 
-    const praiseText = response.content
-      .filter((b): b is Anthropic.TextBlock => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim()
+      praiseText = response.content
+        .filter((b): b is Anthropic.TextBlock => b.type === 'text')
+        .map(b => b.text)
+        .join('')
+        .trim()
 
-    if (!praiseText) return
+      if (!praiseText) praiseText = buildFallbackPraise(rankings[0])
+    } else {
+      // APIキー未設定時はテンプレートで称える
+      praiseText = buildFallbackPraise(rankings[0])
+    }
 
     // praises テーブルに保存
     const best = rankings[0]
