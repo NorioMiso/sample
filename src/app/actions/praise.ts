@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { computeRankings } from '@/lib/ranking'
 import { formatDistance, formatDuration } from '@/lib/utils/geo'
 import type { Database, Json } from '@/types/supabase'
@@ -86,9 +87,10 @@ ${rankings.map((r, i) => `${i + 1}. ${r.conditionDescription}：${r.rank}位 / $
       praiseText = buildFallbackPraise(rankings[0])
     }
 
-    // praises テーブルに保存
+    // praises テーブルに保存（RLS bypass のため admin クライアントを使用）
     const best = rankings[0]
-    const { error } = await supabase.from('praises').insert({
+    const admin = createAdminClient()
+    const { error } = await admin.from('praises').insert({
       user_id:            userId,
       walk_record_id:     walkRecordId,
       praise_type:        'daily',
