@@ -66,8 +66,9 @@ export async function saveWalk(input: SaveWalkInput) {
   }
 
   // 称え生成 + バッジチェックを並列実行（失敗しても散歩保存はブロックしない）
+  // supabase クライアントを直接渡すことで認証コンテキストを確実に引き継ぐ
   const [, badgeResult] = await Promise.allSettled([
-    generateAndSavePraise(record.id, profile.id),
+    generateAndSavePraise(supabase, record.id, profile.id),
     checkAndAwardBadges(supabase, profile.id),
   ])
 
