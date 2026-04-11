@@ -30,22 +30,17 @@ export async function saveWalk(input: SaveWalkInput) {
     .maybeSingle()
   if (!profile) redirect('/auth/setup')
 
-  const durationSeconds = Math.round(
-    (new Date(input.endedAt).getTime() - new Date(input.startedAt).getTime()) / 1000,
-  )
-
-  // walk_records を INSERT
+  // walk_records を INSERT（duration_seconds はDBトリガーが自動計算）
   const { data: record, error: recErr } = await supabase
     .from('walk_records')
     .insert({
-      user_id:          profile.id,
-      started_at:       input.startedAt,
-      ended_at:         input.endedAt,
-      duration_seconds: durationSeconds,
-      distance_meters:  input.distanceMeters,
-      time_of_day:      input.timeOfDay,
-      weather:          input.weather ?? undefined,
-      is_public:        input.isPublic,
+      user_id:         profile.id,
+      started_at:      input.startedAt,
+      ended_at:        input.endedAt,
+      distance_meters: input.distanceMeters,
+      time_of_day:     input.timeOfDay,
+      weather:         input.weather ?? undefined,
+      is_public:       input.isPublic,
     })
     .select('id')
     .single()
@@ -63,8 +58,12 @@ export async function saveWalk(input: SaveWalkInput) {
     })
   }
 
-  // walk_stats を upsert
-  await updateWalkStats(supabase, profile.id, input)
+  // walk_stats を upsert（失敗しても散歩保存はブロックしない）
+  try {
+    await updateWalkStats(supabase, profile.id, input)
+  } catch (e) {
+    console.error('[walk] updateWalkStats failed:', e)
+  }
 
   // 称え生成 + バッジチェックを並列実行（失敗しても散歩保存はブロックしない）
   const [, badgeResult] = await Promise.allSettled([
